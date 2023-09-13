@@ -36,6 +36,7 @@ public class KafkaHandler {
             log.info("event {} complete", eventNumber);
         } catch (Exception ex) {
             log.error("event {} failed", eventNumber, ex);
+            throw ex;
         }
     }
 
