@@ -1,10 +1,11 @@
 package com.example.kafka.reactive.kafka;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import javax.annotation.PostConstruct;
 
 @Service
 @RequiredArgsConstructor
@@ -21,9 +22,8 @@ public class DeleteItemsWhenTheyCome {
     @PostConstruct
     public void addDeleteHandler() {
         log.info("adding delete handler");
-        kafkaEventhandler
-            .addHandler(event -> event
-                .map(KafkaEvent::getId)
-                .map(this::deleteItem));
+        kafkaEventhandler.addHandler(event -> event
+            .map(KafkaEvent::getId)
+            .flatMap(this::deleteItem));
     }
 }

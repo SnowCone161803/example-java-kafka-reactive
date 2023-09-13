@@ -1,9 +1,9 @@
 package com.example.kafka.reactive.kafka;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.annotation.Order;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -20,19 +20,19 @@ public class KafkaEventHandler {
     private static final Duration EVENT_TIMEOUT = Duration.ofSeconds(5);
 
     // replay everything everytime it has been subscribed to
-    private final Sinks.Many<Function<Mono<KafkaEvent>, Mono<?>>> handlerSink = Sinks.many().replay().all();
+    private Sinks.Many<Function<Mono<KafkaEvent>, Mono<?>>> handlerSink;
 
     private final AtomicInteger eventCount = new AtomicInteger(0);
+
 
     public void handle(KafkaEvent event) {
         final int eventNumber = nextEventNumber();
         log.info("event {} starting", eventNumber);
         try {
             // TODO: don't call this every time
-            var calledHandlers = handlerSink
+            handlerSink
                 .asFlux()
-                .map((f) -> f.apply(Mono.just(event)));
-            Flux.merge(calledHandlers)
+                .flatMap((f) -> f.apply(Mono.just(event)))
                 .blockLast(EVENT_TIMEOUT);
             log.info("event {} complete", eventNumber);
         } catch (Exception ex) {
@@ -50,16 +50,15 @@ public class KafkaEventHandler {
     }
 
     @PostConstruct
-    public void wireInFlux() {
+    public void initialiseSink() {
+        handlerSink = Sinks.many().replay().all();
     }
 
     /**
-     * Connect sink as the last thing that happens to prevent events from not being handled by all
+     * Complete the sink once all other handlers have been added.
      */
-    @PostConstruct
-    // TODO: find how to get the last order
-    @Order(Integer.MAX_VALUE)
-    public void initialise() {
+    @EventListener
+    public void flagAllHandlersAdded(ContextRefreshedEvent event) {
         handlerSink.emitComplete(Sinks.EmitFailureHandler.FAIL_FAST);
     }
 }

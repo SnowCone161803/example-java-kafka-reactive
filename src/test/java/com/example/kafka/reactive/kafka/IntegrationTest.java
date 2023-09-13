@@ -17,6 +17,9 @@ public class IntegrationTest {
     @Test
     public void test_simple_hander() throws Exception {
         kafkaEventHandler.handle(createEvent());
+        kafkaEventHandler.handle(createEvent());
+        kafkaEventHandler.handle(createEvent());
+        kafkaEventHandler.handle(createEvent());
     }
 
     private KafkaEvent createEvent() {
