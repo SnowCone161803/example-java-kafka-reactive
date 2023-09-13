@@ -26,6 +26,7 @@ public class AddItemsAndFailOccasionally {
             log.info("simulating adding succeeding: [{}]", id);
             return Mono.just(true);
         } else {
+            failCount.set(0);
             return Mono.<Boolean>fromCallable(() -> {
                 // add delay to allow other handlers to complete
                 Thread.sleep(500);
