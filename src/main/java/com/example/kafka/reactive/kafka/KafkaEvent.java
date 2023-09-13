@@ -1,9 +1,9 @@
 package com.example.kafka.reactive.kafka;
 
-import lombok.Data;
+import lombok.Value;
 
-@Data
+@Value
 public class KafkaEvent {
 
-     String id;
+    int id;
 }

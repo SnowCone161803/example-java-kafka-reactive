@@ -17,7 +17,7 @@ import java.util.function.Function;
 public class KafkaEventHandler {
 
     // way too long
-    private static final Duration EVENT_TIMEOUT = Duration.ofMinutes(5);
+    private static final Duration EVENT_TIMEOUT = Duration.ofSeconds(5);
 
     // replay everything everytime it has been subscribed to
     private final Sinks.Many<Function<Mono<KafkaEvent>, Mono<?>>> handlerSink = Sinks.many().replay().all();
@@ -28,10 +28,12 @@ public class KafkaEventHandler {
         final int eventNumber = nextEventNumber();
         log.info("event {} starting", eventNumber);
         try {
+            // TODO: don't call this every time
             var calledHandlers = handlerSink
                 .asFlux()
                 .map((f) -> f.apply(Mono.just(event)));
             Flux.merge(calledHandlers)
+                .take(1)
                 .blockLast(EVENT_TIMEOUT);
             log.info("event {} complete", eventNumber);
         } catch (Exception ex) {
@@ -48,13 +50,17 @@ public class KafkaEventHandler {
         return this.eventCount.getAndIncrement();
     }
 
+    @PostConstruct
+    public void wireInFlux() {
+    }
+
     /**
      * Connect sink as the last thing that happens to prevent events from not being handled by all
      */
     @PostConstruct
     // TODO: find how to get the last order
     @Order(Integer.MAX_VALUE)
-    public void connectSink() {
+    public void initialise() {
         // TODO: connect the handler flux as all handlers will be added at this point
     }
 }
