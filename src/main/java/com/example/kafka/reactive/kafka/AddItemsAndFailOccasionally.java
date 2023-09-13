@@ -16,13 +16,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class AddItemsAndFailOccasionally {
 
+    private static final int FAIL_EVERY = 3;
     private final KafkaEventHandler kafkaEventHandler;
-    private final int FAIL_EVERY = 3;
 
     private final AtomicInteger failCount = new AtomicInteger();
 
     private Mono<Boolean> addItem(int id) {
-        if (failCount.incrementAndGet() <= FAIL_EVERY) {
+        if (failCount.incrementAndGet() < FAIL_EVERY) {
             log.info("simulating adding succeeding: [{}]", id);
             return Mono.just(true);
         } else {
