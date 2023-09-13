@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -21,18 +22,17 @@ public class KafkaEventHandler {
 
     // replay everything everytime it has been subscribed to
     private Sinks.Many<Function<Mono<KafkaEvent>, Mono<?>>> handlerSink;
+    private Flux<Function<Mono<KafkaEvent>, Mono<?>>> handlerFlux;
 
     private final AtomicInteger eventCount = new AtomicInteger(0);
-
 
     public void handle(KafkaEvent event) {
         final int eventNumber = nextEventNumber();
         log.info("event {} starting", eventNumber);
         try {
             // TODO: don't call this every time
-            handlerSink
-                .asFlux()
-                .flatMap((f) -> f.apply(Mono.just(event)))
+            handlerFlux
+                .flatMap(f -> f.apply(Mono.just(event)))
                 .blockLast(EVENT_TIMEOUT);
             log.info("event {} complete", eventNumber);
         } catch (Exception ex) {
@@ -52,6 +52,8 @@ public class KafkaEventHandler {
     @PostConstruct
     public void initialiseSink() {
         handlerSink = Sinks.many().replay().all();
+        // construct the flux once!
+        handlerFlux = handlerSink.asFlux();
     }
 
     /**

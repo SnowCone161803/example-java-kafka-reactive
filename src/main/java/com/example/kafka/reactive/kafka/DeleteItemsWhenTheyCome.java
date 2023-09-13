@@ -2,6 +2,7 @@ package com.example.kafka.reactive.kafka;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -12,7 +13,7 @@ import javax.annotation.PostConstruct;
 @Slf4j
 public class DeleteItemsWhenTheyCome {
 
-    private final KafkaEventHandler kafkaEventhandler;
+    private final KafkaEventHandler kafkaEventHandler;
 
     private Mono<Boolean> deleteItem(int id) {
         log.info("event triggered deletion of item with id [{}]", id);
@@ -22,7 +23,7 @@ public class DeleteItemsWhenTheyCome {
     @PostConstruct
     public void addDeleteHandler() {
         log.info("adding delete handler");
-        kafkaEventhandler.addHandler(event -> event
+        kafkaEventHandler.addHandler(event -> event
             .map(KafkaEvent::getId)
             .flatMap(this::deleteItem));
     }
