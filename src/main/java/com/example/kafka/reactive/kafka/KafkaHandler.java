@@ -35,7 +35,7 @@ public class KafkaHandler {
                 .blockLast(EVENT_TIMEOUT);
             log.info("event {} complete", eventNumber);
         } catch (Exception ex) {
-            log.error("event {} failed", eventNumber);
+            log.error("event {} failed", eventNumber, ex);
         }
     }
 
