@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 @Service
 @Slf4j
-public class KafkaHandler {
+public class KafkaEventHandler {
 
     // way too long
     private static final Duration EVENT_TIMEOUT = Duration.ofMinutes(5);
