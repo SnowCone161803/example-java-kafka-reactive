@@ -38,5 +38,6 @@ public class KafkaHandler {
     // TODO: find how to get the last order
     @Order(Integer.MAX_VALUE)
     public void connectSink() {
+        // TODO: connect the handler flux as all handlers will be added at this point
     }
 }
