@@ -37,7 +37,12 @@
 			<artifactId>reactor-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>3.4.21</version>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>
