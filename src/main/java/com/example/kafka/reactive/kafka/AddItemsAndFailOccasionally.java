@@ -29,9 +29,11 @@ public class AddItemsAndFailOccasionally {
             failCount.set(0);
             return Mono.<Boolean>fromCallable(() -> {
                 // add delay to allow other handlers to complete
+                // you'll see some handlers complete, but others fail on the event that fails to complete
                 Thread.sleep(500);
                 log.info("simulating failure to add id: [{}]", id);
                 throw new RuntimeException("Unable to add [" + id + "]");
+                // needed because Thread.sleep(...) is blocking
             }).subscribeOn(Schedulers.boundedElastic());
         }
     }

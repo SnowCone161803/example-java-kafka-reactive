@@ -30,7 +30,8 @@ public class KafkaEventHandler {
         final int eventNumber = nextEventNumber();
         log.info("event {} starting", eventNumber);
         try {
-            // TODO: don't call this every time
+            // TODO: don't call this every time, try using Flux.transform(...) instead
+            //       (this might mean that less of the `Flux` will need to be rebuilt for each event)
             handlerFlux
                 .flatMap(f -> f.apply(Mono.just(event)))
                 .blockLast(EVENT_TIMEOUT);

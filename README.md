@@ -34,3 +34,8 @@ The log also shows that even though previous events fail, future events are hand
 `DeleteItemsWhenTheyCome`
 - adds a handler to `KafkaEventHandler`
 - logs out that it is deleting
+
+## Notes
+
+adding multiple handlers this way can mean that some handlers can succeed and others fail.  
+I'd like to see use cases to work out how to handle situations individually
