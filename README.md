@@ -1,7 +1,8 @@
 # example-java-kafka-reactive
 Reactive wrapper around a kafka event handler
 
-This app doesn't run. Run `IntegrationTests` and see what happens in the log.
+This app doesn't do anything if started.  
+Run `IntegrationTests` and see what happens in the log.
 
 It has been setup so that every event triggers both:
 - an add operation (simulated with log message)
@@ -12,6 +13,8 @@ This shows that failures throw an exception back to kafka to let it handle thing
 This allows kafka to retry the event.
 
 The log also shows that even though previous events fail, future events are handled normally.
+
+See [the example logfile](./example-integration-test-log.log) for what is output from the `IntegrationTests`.
 
 ## Parts of the system
 
