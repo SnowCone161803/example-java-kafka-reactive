@@ -33,7 +33,6 @@ public class KafkaEventHandler {
                 .asFlux()
                 .map((f) -> f.apply(Mono.just(event)));
             Flux.merge(calledHandlers)
-                .take(1)
                 .blockLast(EVENT_TIMEOUT);
             log.info("event {} complete", eventNumber);
         } catch (Exception ex) {
@@ -61,6 +60,6 @@ public class KafkaEventHandler {
     // TODO: find how to get the last order
     @Order(Integer.MAX_VALUE)
     public void initialise() {
-        // TODO: connect the handler flux as all handlers will be added at this point
+        handlerSink.emitComplete(Sinks.EmitFailureHandler.FAIL_FAST);
     }
 }
