@@ -10,7 +10,6 @@ import reactor.core.publisher.Sinks;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -51,8 +50,7 @@ public class KafkaEventHandler {
             log.info("event {} complete", eventNumber);
         } catch (InterruptedException ex) {
             throw new IllegalStateException("event lock timed out", ex);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             log.error("event {} failed", eventNumber, ex);
             throw ex;
         }
