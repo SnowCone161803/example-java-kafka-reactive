@@ -10,7 +10,11 @@ import reactor.core.publisher.Sinks;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 @Service
@@ -19,10 +23,12 @@ public class KafkaEventHandler {
 
     // way too long
     private static final Duration EVENT_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration STARTUP_TIMEOUT = Duration.ofMillis(100);
 
     // replay everything everytime it has been subscribed to
     private Sinks.Many<Function<Mono<KafkaEvent>, Mono<?>>> handlerSink;
     private Flux<Function<Mono<KafkaEvent>, Mono<?>>> handlerFlux;
+    private final Lock startupLock = new ReentrantLock();
 
     private final AtomicInteger eventCount = new AtomicInteger(0);
 
@@ -30,13 +36,23 @@ public class KafkaEventHandler {
         final int eventNumber = nextEventNumber();
         log.info("event {} starting", eventNumber);
         try {
+            // should be way longer than needed
+            if (!startupLock.tryLock(1, TimeUnit.SECONDS)) {
+                throw new IllegalStateException("Unable to aquire lock when starting up event handler");
+            }
             // TODO: don't call this every time, try using Flux.transform(...) instead
             //       (this might mean that less of the `Flux` will need to be rebuilt for each event)
             handlerFlux
+                .doOnSubscribe((s) -> {
+                    this.startupLock.unlock();
+                })
                 .flatMap(f -> f.apply(Mono.just(event)))
                 .blockLast(EVENT_TIMEOUT);
             log.info("event {} complete", eventNumber);
-        } catch (Exception ex) {
+        } catch (InterruptedException ex) {
+            throw new IllegalStateException("event lock timed out", ex);
+        }
+        catch (Exception ex) {
             log.error("event {} failed", eventNumber, ex);
             throw ex;
         }
