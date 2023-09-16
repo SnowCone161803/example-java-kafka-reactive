@@ -37,7 +37,7 @@ public class KafkaEventHandler {
         log.info("event {} starting", eventNumber);
         try {
             // should be way longer than needed
-            if (!startupLock.tryLock(1, TimeUnit.SECONDS)) {
+            if (!startupLock.tryLock(STARTUP_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
                 throw new IllegalStateException("Unable to aquire lock when starting up event handler");
             }
             // TODO: don't call this every time, try using Flux.transform(...) instead
