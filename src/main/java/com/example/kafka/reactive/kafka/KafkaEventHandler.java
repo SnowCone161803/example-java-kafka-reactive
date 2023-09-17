@@ -25,8 +25,9 @@ public class KafkaEventHandler {
     private static final Duration STARTUP_TIMEOUT = Duration.ofMillis(100);
 
     // replay everything everytime it has been subscribed to
-    private Sinks.Many<Function<Mono<KafkaEvent>, Mono<?>>> handlerSink;
-    private Flux<Function<Mono<KafkaEvent>, Mono<?>>> handlerFlux;
+    private Sinks.Many<Mono<?>> handlerSink;
+    private Sinks.One<KafkaEvent> eventSink;
+    private Flux<Mono<?>> handlerFlux;
     private final Lock startupLock = new ReentrantLock();
 
     private final AtomicInteger eventCount = new AtomicInteger(0);
@@ -39,13 +40,14 @@ public class KafkaEventHandler {
             if (!startupLock.tryLock(STARTUP_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
                 throw new IllegalStateException("Unable to aquire lock when starting up event handler");
             }
+            eventSink.tryEmitValue(event);
             // TODO: don't call this every time, try using Flux.transform(...) instead
             //       (this might mean that less of the `Flux` will need to be rebuilt for each event)
             handlerFlux
                 .doOnSubscribe((s) -> {
                     this.startupLock.unlock();
                 })
-                .flatMap(f -> f.apply(Mono.just(event)))
+//                .flatMap(f -> f.apply(Mono.just(event)))
                 .blockLast(EVENT_TIMEOUT);
             log.info("event {} complete", eventNumber);
         } catch (InterruptedException ex) {
@@ -57,7 +59,7 @@ public class KafkaEventHandler {
     }
 
     public void addHandler(Function<Mono<KafkaEvent>, Mono<?>> handler) {
-        handlerSink.tryEmitNext(handler);
+        handlerSink.tryEmitNext(handler.apply(eventSink.asMono()));
     }
 
     private int nextEventNumber() {
@@ -69,6 +71,7 @@ public class KafkaEventHandler {
         handlerSink = Sinks.many().replay().all();
         // construct the flux once!
         handlerFlux = handlerSink.asFlux();
+        eventSink = Sinks.one();
     }
 
     /**
