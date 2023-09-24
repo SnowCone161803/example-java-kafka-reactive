@@ -63,13 +63,12 @@ public class KafkaEventHandler {
     }
 
     private int nextEventNumber() {
-        return this.eventCount.getAndIncrement();
+        return eventCount.getAndIncrement();
     }
 
     @PostConstruct
     public void initialiseSink() {
         handlerSink = Sinks.many().replay().all();
-        // construct the flux once!
         handlerFlux = handlerSink.asFlux();
         eventSink = Sinks.one();
     }
