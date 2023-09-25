@@ -17,7 +17,7 @@ public class SingleEventHandler<E, R> {
     private final Mono<R> fullAction;
 
     public static <T, R> SingleEventHandler<T, R> handleEventWith(Function<Mono<T>, Mono<R>> handler) {
-        return new SingleEventHandler<T, R>(handler);
+        return new SingleEventHandler<>(handler);
     }
 
     private SingleEventHandler(Function<Mono<E>, Mono<R>> handler) {
