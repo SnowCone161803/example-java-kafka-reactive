@@ -30,6 +30,8 @@ public class SingleEventHandler<E, R> {
     }
 
     public Mono<R> next(E event) {
+        // lock so that the result of the returned mono is the result of the input event
+        // TODO: test this is necessary (jcstress)
         newEventLock.lock();
         eventSink.tryEmitValue(event);
         return fullAction;
