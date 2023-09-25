@@ -17,7 +17,7 @@ public class IntegrationTest {
     KafkaEventHandler kafkaEventHandler;
 
     @Test
-    public void test_simple_hander() throws Exception {
+    public void test_simple_handler() throws Exception {
         for (int i = 0; i < 9; ++i) {
             try {
                 kafkaEventHandler.handle(createEvent());
