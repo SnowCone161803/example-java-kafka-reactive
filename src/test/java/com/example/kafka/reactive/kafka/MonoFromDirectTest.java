@@ -73,7 +73,7 @@ public class MonoFromDirectTest {
     }
 
     @Test
-    public void test_gettingNextValue_andSubsribingManyTimes() throws Exception {
+    public void test_gettingNextValue_andSubscribingManyTimes() throws Exception {
         var sink = Sinks.one();
         var mono = sink.asMono();
         sink.tryEmitValue(1);
