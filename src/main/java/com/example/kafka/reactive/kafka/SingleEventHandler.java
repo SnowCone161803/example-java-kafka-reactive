@@ -16,7 +16,7 @@ public class SingleEventHandler<E, R> {
     private final Lock newEventLock = new ReentrantLock();
     private final Mono<R> fullAction;
 
-    public static <T, R> SingleEventHandler<T, R> handleEvent(Function<Mono<T>, Mono<R>> handler) {
+    public static <T, R> SingleEventHandler<T, R> handleEventWith(Function<Mono<T>, Mono<R>> handler) {
         return new SingleEventHandler<T, R>(handler);
     }
 
@@ -26,7 +26,7 @@ public class SingleEventHandler<E, R> {
         this.fullAction = handler.apply(unlockingMono);
     }
 
-    public Mono<R> handle(E event) {
+    public Mono<R> next(E event) {
         newEventLock.lock();
         eventSink.tryEmitValue(event);
         return fullAction;
