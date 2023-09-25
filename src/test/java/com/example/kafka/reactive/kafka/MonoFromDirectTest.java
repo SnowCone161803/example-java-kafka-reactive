@@ -11,12 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MonoFromDirectTest {
 
     @Test
-    public void test_sink_blocking_first_element() throws Exception {
-        // can't get this to work
-        var sink = Sinks.many().multicast().onBackpressureBuffer();
-    }
-
-    @Test
     public void test_share_next_gives_me_things_multiple_times() throws Exception {
         // Does what I need
         var sink = Sinks.many().multicast().onBackpressureBuffer();
