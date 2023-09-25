@@ -21,6 +21,9 @@ public class SingleEventHandler<E, R> {
     }
 
     private SingleEventHandler(Function<Mono<E>, Mono<R>> handler) {
+        // unlock the new event lock as soon as the handler is subscribed to
+        // ASSUMPTION: this should be a FAST action
+        // TODO: test with jcstress
         final Mono<E> unlockingMono = eventSink.asMono()
             .doOnSubscribe(e -> newEventLock.unlock());
         this.fullAction = handler.apply(unlockingMono);
