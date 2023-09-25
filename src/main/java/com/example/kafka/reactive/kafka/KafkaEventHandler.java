@@ -1,16 +1,9 @@
 package com.example.kafka.reactive.kafka;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.Sinks;
 
-import javax.annotation.PostConstruct;
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -21,6 +14,7 @@ import java.util.function.Function;
 public class KafkaEventHandler {
 
     private SingleEventHandler<KafkaEvent, ?> eventHandler;
+    private final Lock eventLock = new ReentrantLock();
 
     private final AtomicInteger eventCount = new AtomicInteger(0);
 
@@ -28,8 +22,13 @@ public class KafkaEventHandler {
         final int eventNumber = nextEventNumber();
         log.info("event {} starting", eventNumber);
         try {
+            eventLock.lock();
             eventHandler
                 .next(event)
+                .doOnSubscribe(e -> {
+                    log.info("outer doOnSubscribe hit");
+                    eventLock.unlock();
+                })
                 .block();
             log.info("event {} complete", eventNumber);
         } catch (Exception ex) {
@@ -38,7 +37,7 @@ public class KafkaEventHandler {
         }
     }
 
-    public <R> void addHandler(Function<Mono<KafkaEvent>, Mono<R>> handler) {
+    public <R> void addHandler(Function<Flux<KafkaEvent>, Flux<R>> handler) {
        eventHandler = SingleEventHandler.handleEventWith(handler);
     }
 

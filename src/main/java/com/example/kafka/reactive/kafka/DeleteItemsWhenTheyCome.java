@@ -14,7 +14,7 @@ public class DeleteItemsWhenTheyCome {
 
     private final KafkaEventHandler kafkaEventHandler;
 
-    private Mono<Boolean> deleteItem(int id) {
+    private Mono<Boolean> deleteItem(String id) {
         log.info("event triggered deletion of item with id [{}]", id);
         return Mono.just(true);
     }

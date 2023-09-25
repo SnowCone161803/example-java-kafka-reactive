@@ -21,7 +21,7 @@ public class AddItemsAndFailOccasionally {
 
     private final AtomicInteger failCount = new AtomicInteger();
 
-    private Mono<Boolean> addItem(int id) {
+    private Mono<Boolean> addItem(String id) {
         if (failCount.incrementAndGet() < FAIL_EVERY) {
             log.info("simulating adding succeeding: [{}]", id);
             return Mono.just(true);

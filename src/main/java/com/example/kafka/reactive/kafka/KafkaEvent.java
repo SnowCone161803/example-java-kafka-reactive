@@ -5,5 +5,5 @@ import lombok.Value;
 @Value
 public class KafkaEvent {
 
-    int id;
+    String id;
 }
