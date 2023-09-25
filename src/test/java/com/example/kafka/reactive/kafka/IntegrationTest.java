@@ -51,10 +51,16 @@ public class IntegrationTest {
     }
 
     private void displayResults() {
+        displayResultsWithPrefix("first");
+        displayResultsWithPrefix("second");
+        displayResultsWithPrefix("third");
+        displayResultsWithPrefix("fourth");
+    }
+
+    private void displayResultsWithPrefix(String prefix) {
         eventsHandled.stream()
-            .filter(e -> e.startsWith("first"))
-            .forEach(e -> log.info("first event: {}", e));
-        log.info("results: {}", eventsHandled);
+            .filter(e -> e.startsWith(prefix))
+            .forEach(e -> log.info("{} event: {}", prefix, e));
     }
 
     private void sendEvents(String discriminator) {
