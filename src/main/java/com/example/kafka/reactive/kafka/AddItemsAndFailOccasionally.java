@@ -2,13 +2,11 @@ package com.example.kafka.reactive.kafka;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
-import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
